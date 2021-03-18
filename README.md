@@ -2,6 +2,8 @@ Script to check validity and expiration of TLS/SSL certificate for given host, p
 
 May be used standalone or with Zabbix. See example of integration in `userparameters_ssl_cert_check.conf` and [zabbix manual](https://www.zabbix.com/documentation/current/manual/config/items/userparameters) about user parameters.
 
+Can be used with busybox ash shell instead of bash.
+
 #### Usage
 
 `ssl_cert_check.sh valid|expire <hostname or IP> [port][/[starttls protocol]] [domain for TLS SNI] [check timeout (seconds)]`
@@ -64,7 +66,7 @@ user@host:~$ ./ssl_cert_check.sh valid 127.0.0.1 443 example.com 10
 
 #### Using with busybox, like Alpine-based Docker images
 
-Busybox `date` can not parse date format from `openssl`. If you are using busybox, for example for Alpine-based Docker images, install `coreutils` package.
+Busybox `date` can not parse date format from `openssl`. If you are using busybox, for example for Alpine-based Docker images, install `coreutils` package. And don't forget to update first line to `#!/bin/ash`.
 
 
 **P.S.** If this code is useful for you - don't forget to put a star on it's [github repo](https://github.com/selivan/https-ssl-cert-check-zabbix).

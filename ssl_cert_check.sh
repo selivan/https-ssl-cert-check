@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Busybox: replace first line with
+#!/bin/ash
+
 default_check_timeout=5
 error_code=-65535
 
@@ -55,13 +58,13 @@ check_timeout="${5:-$default_check_timeout}"
 starttls=""
 starttls_proto=""
 
-IFS='/' split=($port)
-
-if [ ${#split[@]} -gt 1 ]; then
-	port="${split[0]}"
-	if [ "${split[1]}" != "tls" ]; then
+# No bash arrays so this works in busybox ash shell
+if echo "$port" | grep -q "/"; then
+	starttls_option=$( echo "$port" | cut -d/ -f2)
+	port=$( echo "$port" | cut -d/ -f1)
+	if [ "$starttls_option" != "tls" ]; then
 		starttls="-starttls"
-		starttls_proto="${split[1]}"
+		starttls_proto="$starttls_option"
 	fi
 fi
 
@@ -78,12 +81,8 @@ fi
 # Check arguments
 [ "$#" -lt 2 ] && show_help && exit 0
 [ "$check_type" = "expire" ] || [ "$check_type" = "valid" ] || error "Wrong check type. Should be one of: expire,valid"
-[[ "$port" =~ ^[0-9]+$ ]] || error "Port should be a number"
-{ [ "$port" -ge 1 ] && [ "$port" -le 65535 ]; } || error "Port should be between 1 and 65535"
-if [ ! -z "$starttls_proto" ]; then
-	[[ "$starttls_proto" =~ ^[a-z0-9]+$ ]] || error "Starttls protocol should be an identifier"
-fi
-[[ "$check_timeout" =~ ^[0-9]+$ ]] || error "Check timeout should be a number"
+{ [ "$port" -ge 1 ] && [ "$port" -le 65535 ]; } || error "Port should be a number between 1 and 65535"
+[ "$check_timeout" -ge 1 ] || error "Check timeout should be a positive number"
 
 # Get certificate
 if ! output=$( echo \
